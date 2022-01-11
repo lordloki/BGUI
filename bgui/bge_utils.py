@@ -125,17 +125,17 @@ class System(BguiSystem):
 
 		# Handle the mouse
 		mouse = self.mouse
-		mouse_events = mouse.events
+		mouse_events = mouse.inputs
 
 		pos = list(mouse.position[:])
 		pos[0] *= render.getWindowWidth()
 		pos[1] = render.getWindowHeight() - (render.getWindowHeight() * pos[1])
 
-		if mouse_events[events.LEFTMOUSE] == logic.KX_INPUT_JUST_ACTIVATED:
+		if mouse_events[events.LEFTMOUSE].activated:
 			mouse_state = BGUI_MOUSE_CLICK
-		elif mouse_events[events.LEFTMOUSE] == logic.KX_INPUT_JUST_RELEASED:
+		elif mouse_events[events.LEFTMOUSE].released:
 			mouse_state = BGUI_MOUSE_RELEASE
-		elif mouse_events[events.LEFTMOUSE] == logic.KX_INPUT_ACTIVE:
+		elif mouse_events[events.LEFTMOUSE].active:
 			mouse_state = BGUI_MOUSE_ACTIVE
 		else:
 			mouse_state = BGUI_MOUSE_NONE
@@ -145,10 +145,10 @@ class System(BguiSystem):
 		# Handle the keyboard
 		keyboard = logic.keyboard
 
-		key_events = keyboard.events
-		is_shifted = key_events[events.LEFTSHIFTKEY] == logic.KX_INPUT_ACTIVE or \
-					key_events[events.RIGHTSHIFTKEY] == logic.KX_INPUT_ACTIVE
+		key_events = keyboard.inputs
+		is_shifted = key_events[events.LEFTSHIFTKEY].active or \
+					key_events[events.RIGHTSHIFTKEY].active
 
-		for key, state in keyboard.events.items():
-			if state == logic.KX_INPUT_JUST_ACTIVATED:
+		for key, state in key_events.items():
+			if state.activated:
 				self.update_keyboard(self.keymap[key], is_shifted)

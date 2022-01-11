@@ -7,6 +7,8 @@ This module defines the following constants:
 	* BGUI_LINEAR
 """
 
+import bgl
+
 from .gl_utils import *
 from .texture import ImageTexture
 
@@ -81,7 +83,10 @@ class Image(Widget):
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
 		# Bind the texture
-		self._texture.bind()
+		if hasattr(self._texture, "bind"):
+			self._texture.bind()
+		else:
+			bgl.glBindTexture(bgl.GL_TEXTURE_2D, self._texture.colorBindCode)
 
 		# Draw the textured quad
 		glColor4f(*self.color)
