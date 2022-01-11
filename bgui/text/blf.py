@@ -4,6 +4,9 @@ import blf
 class BlfTextLibrary(TextLibrary):
 	"""Text library wrapper around blf"""
 
+	def setColor(self, fontid, r, g, b, a):
+		blf.color(fontid, r, g, b, a)
+
 	def draw(self, fontid, text):
 		blf.draw(fontid, text)
 

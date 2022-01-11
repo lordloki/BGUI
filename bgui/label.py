@@ -1,6 +1,8 @@
 from .gl_utils import *
 from .widget import Widget, BGUI_DEFAULT, BGUI_NO_NORMALIZE
 
+import bge
+
 
 class Label(Widget):
 	"""Widget for displaying text"""
@@ -105,19 +107,24 @@ class Label(Widget):
 
 		self.system.textlib.size(self.fontid, self.pt_size, 72)
 
-		if self.outline_size:
-			glColor4f(*self.outline_color)
-			if self.outline_smoothing:
-				steps = range(-self.outline_size, self.outline_size + 1)
-			else:
-				steps = (-self.outline_size, 0, self.outline_size)
+		if bge.app.version[0] >= 3: # UPBGE 0.3.0 or newer:
+			self.system.textlib.setColor(self.fontid, *self.color)
+			self._draw_text(*self.position)
 
-			for x in steps:
-				for y in steps:
-					self._draw_text(self.position[0] + x, self.position[1] + y)
+		else: # UPBGE 0.2.5:
+			if self.outline_size:
+				glColor4f(*self.outline_color)
+				if self.outline_smoothing:
+					steps = range(-self.outline_size, self.outline_size + 1)
+				else:
+					steps = (-self.outline_size, 0, self.outline_size)
 
-		glColor4f(*self.color)
-		self._draw_text(*self.position)
+				for x in steps:
+					for y in steps:
+						self._draw_text(self.position[0] + x, self.position[1] + y)
+
+			glColor4f(*self.color)
+			self._draw_text(*self.position)
 
 		Widget._draw(self)
 

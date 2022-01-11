@@ -9,6 +9,10 @@ class TextLibrary:
 	__metaclass__ = abc.ABCMeta
 
 	@abc.abstractmethod
+	def setColor(self, fontid, r, g, b, a):
+		pass
+
+	@abc.abstractmethod
 	def load(self, filename):
 		pass
 

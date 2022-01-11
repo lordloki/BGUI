@@ -1,6 +1,13 @@
 from .gl_utils import *
 from .widget import Widget, BGUI_DEFAULT
 
+import bge
+
+# UPBGE 0.3:
+if bge.app.version[0] >= 3:
+	import gpu
+	from gpu_extras.batch import batch_for_shader
+
 
 class Frame(Widget):
 	"""Frame for storing other widgets"""
@@ -47,40 +54,73 @@ class Frame(Widget):
 		else:
 			self.border = self.theme['BorderSize']
 
+		# UPBGE 0.3:
+		if bge.app.version[0] >= 3:
+			self.lineShader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
+			self.shader = gpu.shader.from_builtin('2D_SMOOTH_COLOR')
+
 	def _draw(self):
 		"""Draw the frame"""
 
-		# Enable alpha blending
-		glEnable(GL_BLEND)
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+		if bge.app.version[0] >= 3: # UPBGE 0.3.0 or newer:			
+			glEnable(GL_BLEND)
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
-		# Enable polygon offset
-		glEnable(GL_POLYGON_OFFSET_FILL)
-		glPolygonOffset(1.0, 1.0)
+			colors = self.colors
+			vertices = self.gl_position
+			indices  = ((0, 1, 3), (3, 1, 2))
 
-		glBegin(GL_QUADS)
-		for i in range(4):
-			glColor4f(self.colors[i][0], self.colors[i][1], self.colors[i][2], self.colors[i][3])
-			glVertex2f(self.gl_position[i][0], self.gl_position[i][1])
-		glEnd()
+			self.shader.bind()
 
-		glDisable(GL_POLYGON_OFFSET_FILL)
+			batch = batch_for_shader(self.shader, 'TRIS', {"pos": vertices, "color":colors}, indices=indices)
+			batch.draw(self.shader)
 
-		# Draw an outline
-		if self.border > 0:
-			# border = self.border/2
-			r, g, b, a = self.border_color
-			glColor4f(r, g, b, a)
-			glPolygonMode(GL_FRONT, GL_LINE)
-			glLineWidth(self.border)
+			glDisable(GL_BLEND)
+
+			if self.border > 0:
+				glLineWidth(1 + self.border)
+				#bColor = list(self.border_color[:3]) + [1]
+				bColor = self.border_color
+				self.lineShader.uniform_float("color", bColor)
+
+				lines = vertices[:] + [vertices[1], vertices[2], vertices[3], vertices[0]]
+				batch = batch_for_shader(self.lineShader, 'LINES', {"pos": lines})
+				batch.draw(self.lineShader)
+
+		else: # UPBGE 0.2.5 or older:
+
+			# Enable alpha blending
+			glEnable(GL_BLEND)
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+			# Enable polygon offset
+			glEnable(GL_POLYGON_OFFSET_FILL)
+			glPolygonOffset(1.0, 1.0)
 
 			glBegin(GL_QUADS)
 			for i in range(4):
+				glColor4f(self.colors[i][0], self.colors[i][1], self.colors[i][2], self.colors[i][3])
 				glVertex2f(self.gl_position[i][0], self.gl_position[i][1])
-
 			glEnd()
 
-			glLineWidth(1.0)
-			glPolygonMode(GL_FRONT, GL_FILL)
+			glDisable(GL_POLYGON_OFFSET_FILL)
 
+			# Draw an outline
+			if self.border > 0:
+				# border = self.border/2
+				r, g, b, a = self.border_color
+				glColor4f(r, g, b, a)
+				glPolygonMode(GL_FRONT, GL_LINE)
+				glLineWidth(self.border)
+
+				glBegin(GL_QUADS)
+				for i in range(4):
+					glVertex2f(self.gl_position[i][0], self.gl_position[i][1])
+
+				glEnd()
+
+				glLineWidth(1.0)
+				glPolygonMode(GL_FRONT, GL_FILL)
+
+		# ...
 		Widget._draw(self)

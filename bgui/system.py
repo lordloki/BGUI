@@ -3,6 +3,8 @@ from .widget import Widget, BGUI_MOUSE_NONE, BGUI_NO_NORMALIZE, BGUI_NO_THEME
 from .theme import Theme
 import weakref
 
+import bge
+
 
 class System(Widget):
 	"""The main gui system. Add widgets to this and then call the render() method
@@ -88,44 +90,53 @@ class System(Widget):
 		if self.size != [view[2], view[3]]:
 			self.size = [view[2], view[3]]
 
-		# Save the state
-		glPushAttrib(GL_ALL_ATTRIB_BITS)
+		if bge.app.version[0] >= 3: # UPBGE 0.3.0 or newer:	
+			
+			# Update any animations
+			Widget._update_anims(self)
 
-		# Disable depth test so we always draw over things
-		glDisable(GL_DEPTH_TEST)
+			# Render the windows
+			Widget._draw(self)
 
-		# Disable lighting so everything is shadless
-		glDisable(GL_LIGHTING)
+		else: # UPBGE 0.2.5:
+			# Save the state
+			glPushAttrib(GL_ALL_ATTRIB_BITS)
 
-		# Unbinding the texture prevents BGUI frames from somehow picking up on
-		# color of the last used texture
-		glBindTexture(GL_TEXTURE_2D, 0)
+			# Disable depth test so we always draw over things
+			glDisable(GL_DEPTH_TEST)
 
-		# Make sure we're using smooth shading instead of flat
-		glShadeModel(GL_SMOOTH)
+			# Disable lighting so everything is shadless
+			glDisable(GL_LIGHTING)
 
-		# Setup the matrices
-		glMatrixMode(GL_TEXTURE)
-		glPushMatrix()
-		glLoadIdentity()
-		glMatrixMode(GL_PROJECTION)
-		glPushMatrix()
-		glLoadIdentity()
-		gluOrtho2D(0, view[2], 0, view[3])
-		glMatrixMode(GL_MODELVIEW)
-		glPushMatrix()
-		glLoadIdentity()
+			# Unbinding the texture prevents BGUI frames from somehow picking up on
+			# color of the last used texture
+			glBindTexture(GL_TEXTURE_2D, 0)
 
-		# Update any animations
-		Widget._update_anims(self)
+			# Make sure we're using smooth shading instead of flat
+			glShadeModel(GL_SMOOTH)
 
-		# Render the windows
-		Widget._draw(self)
+			# Setup the matrices
+			glMatrixMode(GL_TEXTURE)
+			glPushMatrix()
+			glLoadIdentity()
+			glMatrixMode(GL_PROJECTION)
+			glPushMatrix()
+			glLoadIdentity()
+			gluOrtho2D(0, view[2], 0, view[3])
+			glMatrixMode(GL_MODELVIEW)
+			glPushMatrix()
+			glLoadIdentity()
 
-		# Reset the state
-		glPopMatrix()
-		glMatrixMode(GL_PROJECTION)
-		glPopMatrix()
-		glMatrixMode(GL_TEXTURE)
-		glPopMatrix()
-		glPopAttrib()
+			# Update any animations
+			Widget._update_anims(self)
+
+			# Render the windows
+			Widget._draw(self)
+
+			# Reset the state
+			glPopMatrix()
+			glMatrixMode(GL_PROJECTION)
+			glPopMatrix()
+			glMatrixMode(GL_TEXTURE)
+			glPopMatrix()
+			glPopAttrib()
