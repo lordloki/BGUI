@@ -2,22 +2,22 @@ from . import TextLibrary
 import blf
 
 class BlfTextLibrary(TextLibrary):
-	"""Text library wrapper around blf"""
+  """Text library wrapper around blf"""
 
-	def setColor(self, fontid, r, g, b, a):
-		blf.color(fontid, r, g, b, a)
+  def setColor(self, fontid, r, g, b, a):
+    blf.color(fontid, r, g, b, a)
 
-	def draw(self, fontid, text):
-		blf.draw(fontid, text)
+  def draw(self, fontid, text):
+    blf.draw(fontid, text)
 
-	def size(self, fontid, size, dpi):
-		blf.size(fontid, size, dpi)
+  def size(self, fontid, size, dpi):
+    blf.size(fontid, size, dpi)
 
-	def position(self, fontid, x, y, z):
-		blf.position(fontid, x, y, z)
+  def position(self, fontid, x, y, z):
+    blf.position(fontid, x, y, z)
 
-	def dimensions(self, fontid, text):
-		return blf.dimensions(fontid, text)
+  def dimensions(self, fontid, text):
+    return blf.dimensions(fontid, text)
 
-	def load(self, filename):
-		return blf.load(filename)
+  def load(self, filename):
+    return blf.load(filename)
