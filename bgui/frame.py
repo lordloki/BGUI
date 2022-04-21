@@ -1,4 +1,3 @@
-from .gl_utils import *
 from .widget import Widget, BGUI_DEFAULT
 
 import gpu
@@ -55,9 +54,7 @@ class Frame(Widget):
   def _draw(self):
     """Draw the frame"""
 
-
-    glEnable(GL_BLEND)
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    gpu.state.blend_set('ALPHA')
 
     colors = self.colors
     vertices = self.gl_position
@@ -68,10 +65,10 @@ class Frame(Widget):
     batch = batch_for_shader(self.shader, 'TRIS', {"pos": vertices, "color":colors}, indices=indices)
     batch.draw(self.shader)
 
-    glDisable(GL_BLEND)
+    gpu.state.blend_set('NONE')
 
     if self.border > 0:
-      glLineWidth(1 + self.border)
+      gpu.state.line_width_set(1 + self.border)
       #bColor = list(self.border_color[:3]) + [1]
       bColor = self.border_color
       self.lineShader.uniform_float("color", bColor)
@@ -79,5 +76,6 @@ class Frame(Widget):
       lines = vertices[:] + [vertices[1], vertices[2], vertices[3], vertices[0]]
       batch = batch_for_shader(self.lineShader, 'LINES', {"pos": lines})
       batch.draw(self.lineShader)
+      gpu.state.line_width_set(1.0)
 
     Widget._draw(self)
