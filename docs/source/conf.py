@@ -252,8 +252,8 @@ for mod_name in MOCK_MODULES:
 # Generate the doc files
 from doc_parser import doc_parser
 import bgui
-import bgui.bge_utils
-doc_parser([bgui, bgui.bge_utils], '.')
+import bgui.bgui_utils
+doc_parser([bgui, bgui.bgui_utils], '.')
 
 # Add the changelog
 with open('changelog.rst', 'w') as cl_rst:

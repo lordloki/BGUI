@@ -11,14 +11,14 @@ First, you'll need to either grab a "release" version of Bgui from `here <https:
 Setup a System
 --------------
 
-After getting Bgui setup in your project, the next step is to setup a System. In Bgui a System is the top level element in a GUI. It handles mouse and keyboard events and renders the widgets. Bgui's ultimate goal is to be independent of Blender and the BGE. However, there is a ``bgui.bge_utils`` module that contains classes for getting Bgui setup quickly for the BGE::
+After getting Bgui setup in your project, the next step is to setup a System. In Bgui a System is the top level element in a GUI. It handles mouse and keyboard events and renders the widgets. Bgui's ultimate goal is to be independent of Blender and the BGE. However, there is a ``bgui.bgui_utils`` module that contains classes for getting Bgui setup quickly for the BGE::
 
     import bgui
-    import bgui.bge_utils
+    import bgui.bgui_utils
     import bge
 
 
-    class SimpleLayout(bgui.bge_utils.Layout):
+    class SimpleLayout(bgui.bgui_utils.Layout):
         """A layout showcasing various Bgui features"""
 
         def __init__(self, sys, data):
@@ -32,7 +32,7 @@ After getting Bgui setup in your project, the next step is to setup a System. In
 
         if 'sys' not in own:
             # Create our system and show the mouse
-            own['sys'] = bgui.bge_utils.System('../../themes/default')
+            own['sys'] = bgui.bgui_utils.System('../../themes/default')
             own['sys'].load_layout(SimpleLayout, None)
             mouse.visible = True
         else:
