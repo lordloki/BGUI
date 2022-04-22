@@ -1,5 +1,6 @@
 from .gl_utils import *
 from .widget import Widget, BGUI_DEFAULT, BGUI_NO_NORMALIZE
+import blf
 
 
 class Label(Widget):
@@ -31,10 +32,10 @@ class Label(Widget):
     Widget.__init__(self, parent, name, None, [0, 0], pos, sub_theme, options)
 
     if font:
-      self.fontid = self.system.textlib.load(font)
+      self.fontid = blf.load(font)
     else:
       font = self.theme['Font']
-      self.fontid = self.system.textlib.load(font) if font else 0
+      self.fontid = blf.load(font) if font else 0
 
     if pt_size:
       self.pt_size = pt_size
@@ -71,8 +72,8 @@ class Label(Widget):
 
   @text.setter
   def text(self, value):
-    self.system.textlib.size(self.fontid, self.pt_size, 72)
-    size = [self.system.textlib.dimensions(self.fontid, value)[0], self.system.textlib.dimensions(self.fontid, 'Mj')[0]]
+    blf.size(self.fontid, self.pt_size, 72)
+    size = [blf.dimensions(self.fontid, value)[0], blf.dimensions(self.fontid, 'Mj')[0]]
 
     if not (self.options & BGUI_NO_NORMALIZE):
       size[0] /= self.parent.size[0]
@@ -97,15 +98,15 @@ class Label(Widget):
 
   def _draw_text(self, x, y):
     for i, txt in enumerate([i for i in self._text.split('\n')]):
-      self.system.textlib.position(self.fontid, x, y - (self.size[1] * i), 0)
-      self.system.textlib.draw(self.fontid, txt.replace('\t', '    '))
+      blf.position(self.fontid, x, y - (self.size[1] * i), 0)
+      blf.draw(self.fontid, txt.replace('\t', '    '))
 
   def _draw(self):
     """Display the text"""
 
-    self.system.textlib.size(self.fontid, self.pt_size, 72)
+    blf.size(self.fontid, self.pt_size, 72)
 
-    self.system.textlib.setColor(self.fontid, *self.color)
+    blf.setColor(self.fontid, *self.color)
     self._draw_text(*self.position)
 
     Widget._draw(self)
