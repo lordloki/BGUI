@@ -3,6 +3,7 @@
 New Features
 ^^^^^^^^^^^^
   * Adapt code to UPBGE 0.3+ (thanks to Uniday Studio)
+  * Replace OpenGL code by GPU code (vendor agnostic)
   * Rename bge_utils to bgui_utils (bgui.bgui_utils.System)
 
 Bugs Fixed
