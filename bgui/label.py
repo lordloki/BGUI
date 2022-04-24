@@ -106,7 +106,7 @@ class Label(Widget):
 
     blf.size(self.fontid, self.pt_size, 72)
 
-    blf.setColor(self.fontid, *self.color)
+    blf.color(self.fontid, *self.color)
     self._draw_text(*self.position)
 
     Widget._draw(self)
