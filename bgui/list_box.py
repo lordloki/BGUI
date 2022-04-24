@@ -111,19 +111,19 @@ class ListBox(Widget):
       w = self.renderer.render_item(item)
       w.position = [0, 1 - (idx + 1) * (w.size[1] / self.size[1]) - (idx * self.padding)]
       w.size = [1, w.size[1] / self.size[1]]
-      self._spatial_map[item] = [i[:] for i in w.gl_position]  # Make a full copy
+      self._spatial_map[item] = [i[:] for i in w.gpu_view_position]  # Make a full copy
       w._draw()
 
       if self.selected == item:
-        self.highlight.gl_position = [i[:] for i in w.gl_position]
+        self.highlight.gpu_view_position = [i[:] for i in w.gpu_view_position]
         self.highlight.visible = True
 
   def _handle_mouse(self, pos, event):
 
     if event == BGUI_MOUSE_CLICK:
-      for item, gl_position in self._spatial_map.items():
-        if (gl_position[0][0] <= pos[0] <= gl_position[1][0]) and \
-          (gl_position[0][1] <= pos[1] <= gl_position[2][1]):
+      for item, gpu_view_position in self._spatial_map.items():
+        if (gpu_view_position[0][0] <= pos[0] <= gpu_view_position[1][0]) and \
+          (gpu_view_position[0][1] <= pos[1] <= gpu_view_position[2][1]):
             self.selected = item
             break
       else:

@@ -57,7 +57,7 @@ class Frame(Widget):
     gpu.state.blend_set('ALPHA')
 
     colors = self.colors
-    vertices = self.gl_position
+    vertices = self.gpu_view_position
     indices  = ((0, 1, 3), (3, 1, 2))
 
     self.shader.bind()

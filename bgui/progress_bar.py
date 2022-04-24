@@ -72,36 +72,36 @@ class ProgressBar(Widget):
     glEnable(GL_POLYGON_OFFSET_FILL)
     glPolygonOffset(1.0, 1.0)
 
-    mid_x = self.gl_position[0][0] + (self.gl_position[1][0] - self.gl_position[0][0]) * self._percent
+    mid_x = self.gpu_view_position[0][0] + (self.gpu_view_position[1][0] - self.gpu_view_position[0][0]) * self._percent
 
     # Draw fill
     glBegin(GL_QUADS)
     glColor4f(self.fill_colors[0][0], self.fill_colors[0][1], self.fill_colors[0][2], self.fill_colors[0][3])
-    glVertex2f(self.gl_position[0][0], self.gl_position[0][1])
+    glVertex2f(self.gpu_view_position[0][0], self.gpu_view_position[0][1])
 
     glColor4f(self.fill_colors[1][0], self.fill_colors[1][1], self.fill_colors[1][2], self.fill_colors[1][3])
-    glVertex2f(mid_x, self.gl_position[1][1])
+    glVertex2f(mid_x, self.gpu_view_position[1][1])
 
     glColor4f(self.fill_colors[2][0], self.fill_colors[2][1], self.fill_colors[2][2], self.fill_colors[2][3])
-    glVertex2f(mid_x, self.gl_position[2][1])
+    glVertex2f(mid_x, self.gpu_view_position[2][1])
 
     glColor4f(self.fill_colors[3][0], self.fill_colors[3][1], self.fill_colors[3][2], self.fill_colors[3][3])
-    glVertex2f(self.gl_position[3][0], self.gl_position[3][1])
+    glVertex2f(self.gpu_view_position[3][0], self.gpu_view_position[3][1])
     glEnd()
 
     # Draw bg
     glBegin(GL_QUADS)
     glColor4f(self.bg_colors[0][0], self.bg_colors[0][1], self.bg_colors[0][2], self.bg_colors[0][3])
-    glVertex2f(mid_x, self.gl_position[0][1])
+    glVertex2f(mid_x, self.gpu_view_position[0][1])
 
     glColor4f(self.bg_colors[1][0], self.bg_colors[1][1], self.bg_colors[1][2], self.bg_colors[1][3])
-    glVertex2f(self.gl_position[1][0], self.gl_position[1][1])
+    glVertex2f(self.gpu_view_position[1][0], self.gpu_view_position[1][1])
 
     glColor4f(self.bg_colors[2][0], self.bg_colors[2][1], self.bg_colors[2][2], self.bg_colors[2][3])
-    glVertex2f(self.gl_position[2][0], self.gl_position[2][1])
+    glVertex2f(self.gpu_view_position[2][0], self.gpu_view_position[2][1])
 
     glColor4f(self.bg_colors[3][0], self.bg_colors[3][1], self.bg_colors[3][2], self.bg_colors[3][3])
-    glVertex2f(mid_x, self.gl_position[3][1])
+    glVertex2f(mid_x, self.gpu_view_position[3][1])
     glEnd()
 
     # Draw outline
@@ -114,7 +114,7 @@ class ProgressBar(Widget):
 
     glBegin(GL_QUADS)
     for i in range(4):
-      glVertex2f(self.gl_position[i][0], self.gl_position[i][1])
+      glVertex2f(self.gpu_view_position[i][0], self.gpu_view_position[i][1])
 
     glEnd()
 

@@ -286,7 +286,8 @@ class Widget:
     self._position = [x, y]
 
     # OpenGL starts at the bottom left and goes counter clockwise
-    self.gl_position = [
+    # TODO: To check Vulkan and Metal. Currently follows OpenGL
+    self.gpu_view_position = [
           [x, y],
           [x + width, y],
           [x + width, y + height],
@@ -449,8 +450,8 @@ class Widget:
 
     # Run any children callback methods
     for widget in self.children.values():
-      if (widget.gl_position[0][0] <= pos[0] <= widget.gl_position[1][0]) and \
-        (widget.gl_position[0][1] <= pos[1] <= widget.gl_position[2][1]):
+      if (widget.gpu_view_position[0][0] <= pos[0] <= widget.gpu_view_position[1][0]) and \
+        (widget.gpu_view_position[0][1] <= pos[1] <= widget.gpu_view_position[2][1]):
           widget._handle_mouse(pos, event)
       else:
         widget._update_hover(False)
