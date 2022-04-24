@@ -105,7 +105,7 @@ class VideoTexture(Texture):
     data = vid.image
 
     if self.play_audio:
-      self.audio = aud.device().play(aud.Factory(video))
+      self.audio = aud.Device().play(aud.Sound(video))
 
     if data == None:
       print("Unable to load the video", video)
