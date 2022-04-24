@@ -286,7 +286,7 @@ class Widget:
     self._position = [x, y]
 
     # OpenGL starts at the bottom left and goes counter clockwise
-    # TODO: To check Vulkan and Metal. Currently follows OpenGL
+    # TODO: To check Vulkan and Metal. Currently follows OpenGL convention
     self.gpu_view_position = [
           [x, y],
           [x + width, y],

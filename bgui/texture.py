@@ -1,13 +1,8 @@
 # This module encapsulates texture loading so we are not dependent on bge.texture
 
 from .gl_utils import *
-try:
-  from bge import texture
-  import aud
-  USING_BGE_TEXTURE = True
-except ImportError:
-  from PyQt4 import QtOpenGL, QtGui
-  USING_BGE_TEXTURE = False
+from bge import texture
+import aud
 
 class Texture:
   def __init__(self, path, interp_mode):
@@ -59,35 +54,22 @@ class ImageTexture(Texture):
       img = ImageTexture._cache[image]
     else:
       # Load the image data from disk
-      if USING_BGE_TEXTURE:
-        img = texture.ImageFFmpeg(image)
-        img.scale = False
-        if self._caching:
-          ImageTexture._cache[image] = img
-      else:
-        img = QtGui.QImage(image)
+      img = texture.ImageFFmpeg(image)
+      img.scale = False
+      if self._caching:
+        ImageTexture._cache[image] = img
 
-    if USING_BGE_TEXTURE:
-      data = img.image
-      if data == None:
-        print("Unabled to load the image", image)
-        return
+    data = img.image
+    if data == None:
+      print("Unabled to load the image", image)
+      return
 
-      # Upload the texture data
-      self.bind()
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.size[0], img.size[1], 0,
-              GL_RGBA, GL_UNSIGNED_BYTE, data)
+    # Upload the texture data
+    self.bind()
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.size[0], img.size[1], 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, data)
 
-      self.image_size = img.size[:]
-    else:
-      if img.isNull():
-        print("Unable to load the image", image)
-        return
-      glDeleteTextures([self._tex_id])
-      self._tex_id = QtOpenGL.QGLContext.currentContext().bindTexture(img)
-      self.interp_mode = self.interp_mode
-      self.image_size = [img.width(), img.height()]
-
+    self.image_size = img.size[:]
 
     # Save the image name
     self.path = image
@@ -116,17 +98,14 @@ class VideoTexture(Texture):
     if video == self.path:
       return
 
-    if USING_BGE_TEXTURE:
-      vid = texture.VideoFFmpeg(video)
-      vid.repeat = self.repeat
-      vid.play()
-      self.video = vid
-      data = vid.image
+    vid = texture.VideoFFmpeg(video)
+    vid.repeat = self.repeat
+    vid.play()
+    self.video = vid
+    data = vid.image
 
-      if self.play_audio:
-        self.audio = aud.device().play(aud.Factory(video))
-    else:
-      data = None
+    if self.play_audio:
+      self.audio = aud.device().play(aud.Factory(video))
 
     if data == None:
       print("Unable to load the video", video)
