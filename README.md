@@ -5,8 +5,8 @@ Docs: http://bgui.readthedocs.org/en/latest/
 
 # UPBGE Ports
 
-Hi! Guilherme here (from Uniday Studio) and I've been using bgui on [UPBGE](upbge.org) for a while now. **It's stable on UPBGE 0.2.5** and I even published a game using it in this version: [Down the Mines and Ghosts](https://unidaystudio.itch.io/down-the-mines-and-ghosts)
+This is a port started by Guilherme here (from Uniday Studio) to adapt BGUI library to upbge 0.2.5 & 0.3+
 
-Now I'm working on a **UPBGE 0.3 port**. By the time you're reading this, it should be almost done with a few things missing.
+Currently, I (lordloki) am focused in to adapt this library for UPBGE 0.3+.
 
-Enjoy it!
+The purpose is to simplify several parts and reusing internal libraries (bfl, gpu, etc) and to remove specific OpenGL code replacing it by gpu library code.
