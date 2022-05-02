@@ -65,7 +65,7 @@ class Frame(Widget):
     batch = batch_for_shader(self.shader, 'TRIS', {"pos": vertices, "color":colors}, indices=indices)
     batch.draw(self.shader)
 
-    gpu.state.blend_set('NONE')
+    #gpu.state.blend_set('NONE')
 
     if self.border > 0:
       gpu.state.line_width_set(1 + self.border)

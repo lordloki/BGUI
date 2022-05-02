@@ -7,23 +7,21 @@ This module defines the following constants:
   * BGUI_LINEAR
 """
 
+import bpy
 import bgl
+import gpu
+from gpu_extras.batch import batch_for_shader
 
 from .gl_utils import *
 from .texture import ImageTexture
-
 from .widget import Widget, BGUI_DEFAULT, BGUI_CACHE
-
-# Interpolation mode constants for texture filtering
-BGUI_NEAREST = GL_NEAREST
-BGUI_LINEAR = GL_LINEAR
 
 
 class Image(Widget):
   """Widget for displaying images"""
 
   def __init__(self, parent, img, name=None, aspect=None, size=[1, 1], pos=[0, 0],
-        texco=[(0, 0), (1, 0), (1, 1), (0, 1)], interp_mode=BGUI_LINEAR, sub_theme='', options=BGUI_DEFAULT):
+        texco=[(0, 0), (1, 0), (1, 1), (0, 1)], sub_theme='', options=BGUI_DEFAULT):
     """:param parent: the widget's parent
     :param name: the name of the widget
     :param img: the image to use for the widget
@@ -31,7 +29,6 @@ class Image(Widget):
     :param size: a tuple containing the width and height
     :param pos: a tuple containing the x and y position
     :param texco: the UV texture coordinates to use for the image
-    :param interp_mode: texture interpolating mode for both maximizing and minifying the texture (defaults to BGUI_LINEAR)
     :param sub_theme: name of a sub_theme defined in the theme file (similar to CSS classes)
     :param options: various other options
     """
@@ -39,29 +36,22 @@ class Image(Widget):
     Widget.__init__(self, parent, name, aspect, size, pos, sub_theme, options)
 
     if img != None:
-      self._texture = ImageTexture(img, interp_mode, options & BGUI_CACHE)
+      self.image = bpy.data.images.load(img)
+      self.texture = gpu.texture.from_image(self.image)
     else:
-      self._texture = None
+      self.texture = None
 
     #: The UV texture coordinates to use for the image.
     self.texco = texco
+    self.width, self.height = self.image.size
 
-    #: The color of the plane the texture is on.
-    self.color = [1, 1, 1, 1]
-
-  @property
-  def interp_mode(self):
-    """The type of image filtering to be performed on the texture."""
-    return self._texture.interp_mode
-
-  @interp_mode.setter
-  def interp_mode(self, value):
-    self._texture.interp_mode = value
+    # The shader.
+    self.shader = gpu.shader.from_builtin('2D_IMAGE')
 
   @property
   def image_size(self):
     """The size (in pixels) of the currently loaded image, or [0, 0] if an image is not loaded"""
-    return self._texture.size
+    return self.image.size
 
   def update_image(self, img):
     """Changes the image texture
@@ -69,35 +59,24 @@ class Image(Widget):
     :param img: the path to the new image
     :rtype: None
     """
-
-    self._texture.reload(img)
+    self.image = bpy.data.images.load(img)
+    self.texture = gpu.texture.from_image(self.image)
 
   def _draw(self):
     """Draws the image"""
 
-    # Enable textures
-    glEnable(GL_TEXTURE_2D)
-
     # Enable alpha blending
-    glEnable(GL_BLEND)
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    gpu.state.blend_set('ALPHA')
 
-    # Bind the texture
-    if hasattr(self._texture, "bind"):
-      self._texture.bind()
-    else:
-      bgl.glBindTexture(bgl.GL_TEXTURE_2D, self._texture.colorBindCode)
+    position = ((0, 0), (self.width, 0), (self.width, self.height), (0, self.height))
+    vertices = self.gpu_view_position
+    indices  = ((0, 1, 3), (3, 1, 2))
+    self.batch = batch_for_shader(self.shader, 'TRIS', {"pos": vertices, "texCoord": self.texco}, indices=indices)
 
-    # Draw the textured quad
-    glColor4f(*self.color)
+    self.shader.bind()
+    self.shader.uniform_sampler("image", self.texture)
+    self.batch.draw(self.shader)
 
-    glBegin(GL_QUADS)
-    for i in range(4):
-      glTexCoord2f(self.texco[i][0], self.texco[i][1])
-      glVertex2f(self.gpu_view_position[i][0], self.gpu_view_position[i][1])
-    glEnd()
-
-    glBindTexture(GL_TEXTURE_2D, 0)
-
+    #gpu.state.blend_set('NONE')
     # Now draw the children
     Widget._draw(self)
