@@ -1,4 +1,6 @@
-from .gl_utils import *
+import gpu
+from gpu_extras.batch import batch_for_shader
+
 from .widget import Widget, BGUI_DEFAULT
 
 
@@ -54,6 +56,9 @@ class ProgressBar(Widget):
 
     self._percent = percent
 
+    self.line_shader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
+    self.shader = gpu.shader.from_builtin('2D_SMOOTH_COLOR')
+
   @property
   def percent(self):
     return self._percent
@@ -65,59 +70,49 @@ class ProgressBar(Widget):
   def _draw(self):
     """Draw the progress bar"""
     # Enable alpha blending
-    glEnable(GL_BLEND)
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-
-    # Enable polygon offset
-    glEnable(GL_POLYGON_OFFSET_FILL)
-    glPolygonOffset(1.0, 1.0)
+    gpu.state.blend_set('ALPHA_PREMULT')
 
     mid_x = self.gpu_view_position[0][0] + (self.gpu_view_position[1][0] - self.gpu_view_position[0][0]) * self._percent
 
     # Draw fill
-    glBegin(GL_QUADS)
-    glColor4f(self.fill_colors[0][0], self.fill_colors[0][1], self.fill_colors[0][2], self.fill_colors[0][3])
-    glVertex2f(self.gpu_view_position[0][0], self.gpu_view_position[0][1])
+    fill_vertices = (
+    (self.gpu_view_position[0][0],self.gpu_view_position[0][1]),
+    (mid_x, self.gpu_view_position[1][1]),
+    (mid_x, self.gpu_view_position[2][1]),
+    (self.gpu_view_position[3][0], self.gpu_view_position[3][1]))
 
-    glColor4f(self.fill_colors[1][0], self.fill_colors[1][1], self.fill_colors[1][2], self.fill_colors[1][3])
-    glVertex2f(mid_x, self.gpu_view_position[1][1])
+    fill_indices  = ((0, 1, 3), (3, 1, 2))
 
-    glColor4f(self.fill_colors[2][0], self.fill_colors[2][1], self.fill_colors[2][2], self.fill_colors[2][3])
-    glVertex2f(mid_x, self.gpu_view_position[2][1])
+    self.shader.bind()
 
-    glColor4f(self.fill_colors[3][0], self.fill_colors[3][1], self.fill_colors[3][2], self.fill_colors[3][3])
-    glVertex2f(self.gpu_view_position[3][0], self.gpu_view_position[3][1])
-    glEnd()
+    batch = batch_for_shader(self.shader, 'TRIS', {"pos": fill_vertices, "color":self.fill_colors}, indices=fill_indices)
+    batch.draw(self.shader)
 
     # Draw bg
-    glBegin(GL_QUADS)
-    glColor4f(self.bg_colors[0][0], self.bg_colors[0][1], self.bg_colors[0][2], self.bg_colors[0][3])
-    glVertex2f(mid_x, self.gpu_view_position[0][1])
+    bg_vertices = (
+    (mid_x,self.gpu_view_position[0][1]),
+    (self.gpu_view_position[1][0], self.gpu_view_position[1][1]),
+    (self.gpu_view_position[2][0], self.gpu_view_position[2][1]),
+    (mid_x, self.gpu_view_position[3][1]))
 
-    glColor4f(self.bg_colors[1][0], self.bg_colors[1][1], self.bg_colors[1][2], self.bg_colors[1][3])
-    glVertex2f(self.gpu_view_position[1][0], self.gpu_view_position[1][1])
+    bg_indices  = ((0, 1, 3), (3, 1, 2))
 
-    glColor4f(self.bg_colors[2][0], self.bg_colors[2][1], self.bg_colors[2][2], self.bg_colors[2][3])
-    glVertex2f(self.gpu_view_position[2][0], self.gpu_view_position[2][1])
+    self.shader.bind()
 
-    glColor4f(self.bg_colors[3][0], self.bg_colors[3][1], self.bg_colors[3][2], self.bg_colors[3][3])
-    glVertex2f(mid_x, self.gpu_view_position[3][1])
-    glEnd()
+    batch = batch_for_shader(self.shader, 'TRIS', {"pos": bg_vertices, "color":self.bg_colors}, indices=bg_indices)
+    batch.draw(self.shader)
 
     # Draw outline
-    glDisable(GL_POLYGON_OFFSET_FILL)
+    if self.border > 0:
+      gpu.state.line_width_set(1 + self.border)
+      self.line_shader.uniform_float("color", self.border_color)
 
-    r, g, b, a = self.border_color
-    glColor4f(r, g, b, a)
-    glPolygonMode(GL_FRONT, GL_LINE)
-    glLineWidth(self.border)
+      vertices = self.gpu_view_position
+      lines = vertices[:] + [vertices[1], vertices[2], vertices[3], vertices[0]]
+      batch = batch_for_shader(self.line_shader, 'LINES', {"pos": lines})
+      batch.draw(self.line_shader)
+      gpu.state.line_width_set(1.0)
 
-    glBegin(GL_QUADS)
-    for i in range(4):
-      glVertex2f(self.gpu_view_position[i][0], self.gpu_view_position[i][1])
-
-    glEnd()
-
-    glPolygonMode(GL_FRONT, GL_FILL)
+    gpu.state.blend_set('NONE')
 
     Widget._draw(self)
