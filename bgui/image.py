@@ -1,19 +1,7 @@
-"""
-
-This module defines the following constants:
-
-*Texture interpolation modes*
-  * BGUI_NEAREST
-  * BGUI_LINEAR
-"""
-
 import bpy
-import bgl
 import gpu
 from gpu_extras.batch import batch_for_shader
 
-from .gl_utils import *
-from .texture import ImageTexture
 from .widget import Widget, BGUI_DEFAULT, BGUI_CACHE
 
 
@@ -66,9 +54,8 @@ class Image(Widget):
     """Draws the image"""
 
     # Enable alpha blending
-    gpu.state.blend_set('ALPHA')
+    gpu.state.blend_set('ALPHA_PREMULT')
 
-    position = ((0, 0), (self.width, 0), (self.width, self.height), (0, self.height))
     vertices = self.gpu_view_position
     indices  = ((0, 1, 3), (3, 1, 2))
     self.batch = batch_for_shader(self.shader, 'TRIS', {"pos": vertices, "texCoord": self.texco}, indices=indices)
@@ -77,6 +64,7 @@ class Image(Widget):
     self.shader.uniform_sampler("image", self.texture)
     self.batch.draw(self.shader)
 
-    #gpu.state.blend_set('NONE')
+    gpu.state.blend_set('NONE')
+
     # Now draw the children
     Widget._draw(self)

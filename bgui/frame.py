@@ -48,13 +48,13 @@ class Frame(Widget):
     else:
       self.border = self.theme['BorderSize']
 
-    self.lineShader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
+    self.line_shader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
     self.shader = gpu.shader.from_builtin('2D_SMOOTH_COLOR')
 
   def _draw(self):
     """Draw the frame"""
 
-    gpu.state.blend_set('ALPHA')
+    gpu.state.blend_set('ALPHA_PREMULT')
 
     colors = self.colors
     vertices = self.gpu_view_position
@@ -65,17 +65,15 @@ class Frame(Widget):
     batch = batch_for_shader(self.shader, 'TRIS', {"pos": vertices, "color":colors}, indices=indices)
     batch.draw(self.shader)
 
-    #gpu.state.blend_set('NONE')
-
     if self.border > 0:
       gpu.state.line_width_set(1 + self.border)
-      #bColor = list(self.border_color[:3]) + [1]
-      bColor = self.border_color
-      self.lineShader.uniform_float("color", bColor)
+      self.line_shader.uniform_float("color", self.border_color)
 
       lines = vertices[:] + [vertices[1], vertices[2], vertices[3], vertices[0]]
-      batch = batch_for_shader(self.lineShader, 'LINES', {"pos": lines})
-      batch.draw(self.lineShader)
+      batch = batch_for_shader(self.line_shader, 'LINES', {"pos": lines})
+      batch.draw(self.line_shader)
       gpu.state.line_width_set(1.0)
+
+    gpu.state.blend_set('NONE')
 
     Widget._draw(self)
