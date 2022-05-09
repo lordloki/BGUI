@@ -1,4 +1,5 @@
-from .gl_utils import *
+import gpu
+
 from .widget import Widget, BGUI_MOUSE_NONE, BGUI_NO_NORMALIZE, BGUI_NO_THEME
 from .theme import Theme
 import weakref
@@ -23,7 +24,7 @@ class System(Widget):
     # the position will be the top left of the screen
 
     # Get some viewport info
-    view = glGetIntegerv(GL_VIEWPORT)
+    view = gpu.state.viewport_get()
 
     # Theming
     self._system = weakref.ref(self)
@@ -80,7 +81,7 @@ class System(Widget):
     """
 
     # Get some viewport info
-    view = glGetIntegerv(GL_VIEWPORT)
+    view = gpu.state.viewport_get()
 
     # Update the size if the viewport has changed
     if self.size != [view[2], view[3]]:
